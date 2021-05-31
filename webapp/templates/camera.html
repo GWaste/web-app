@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block body %}
+<video id="camera" class="center-in-screen"></video>
+<a href="#" class="btn center-in-screen" id="capture-btn">Capture</a>
+<div class="modal" id="camera-permission-modal">
+    <div class="modal-content">
+        <h3>Permission Required</h3>
+        <p>HiWaste needs camera permission to be able to classify your waste.</p>
+        <hr>
+        <p>Alternatively, if you already taken photo and want to upload a file instead, press the button below</p>
+    </div>
+</div>
+<div class="modal" id="no-camera-modal">
+    <div class="modal-content">
+        <h3>No Camera</h3>
+        <p>Currently you blocked access to camera, or your browser is not supported.</p>
+        <hr>
+        <p>Alternatively, if you already taken photo and want to upload a file instead, press the button below</p>
+    </div>
+</div>
+<script>
+let cameraPermissionDone = false;
+let cameraPermissionModal = M.Modal.init(document.querySelector("#camera-permission-modal"), {
+    'dismissible': false,
+    'endingTop': '20%'
+});
+let cameraStream = null;
+let cameraEl = document.querySelector("#camera");
+if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            postCameraPermission();
+            cameraEl.srcObject = stream;
+            cameraEl.play();
+            cameraStream = stream;
+        }).catch(showNoCamera);
+} else {
+    showNoCamera("not supported");
+}
+function postCameraPermission() {
+    cameraPermissionDone = true;
+    cameraPermissionModal.close();
+}
+function showNoCamera(reason) {
+    postCameraPermission();
+    M.Modal.init(document.querySelector("#no-camera-modal"), {
+        'dismissible': false
+    }).open();
+    console.error(reason);
+}
+setTimeout(() => {
+    if (cameraPermissionDone)
+        return;
+    cameraPermissionModal.open();
+}, 1000);
+document.querySelector("#capture-btn").onclick = () => {
+    cameraEl.pause();
+    cameraStream.getTracks().forEach(track => track.stop());
+    return false;
+}
+</script>
+{% endblock %}

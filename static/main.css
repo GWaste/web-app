@@ -1,0 +1,20 @@
+nav {
+    position: absolute;
+    bottom: 0;
+}
+.center-in-screen {
+    margin: auto;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+#camera {
+    bottom: 64px;
+}
+#capture-btn {
+    top: initial;
+    bottom: 96px;
+    width: fit-content;
+}
