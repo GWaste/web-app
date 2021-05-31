@@ -2,7 +2,17 @@
 
 {% block body %}
 <video id="camera" class="center-in-screen"></video>
-<a href="#" class="btn center-in-screen" id="capture-btn">Capture</a>
+<a href="#" class="btn center-in-screen" id="capture-btn" disabled>Capture</a>
+<canvas id="canvas" class="hide"></canvas>
+<div id="predict-loading-wrapper" class="hide">
+    <div class="preloader-wrapper big active center-in-screen">
+        <div class="spinner-layer spinner-green-only">
+            <div class="circle-clipper left"><div class="circle"></div></div>
+            <div class="gap-patch"><div class="circle"></div></div>
+            <div class="circle-clipper right"><div class="circle"></div></div>
+        </div>
+    </div>
+</div>
 <div class="modal" id="camera-permission-modal">
     <div class="modal-content">
         <h3>Permission Required</h3>
@@ -27,10 +37,13 @@ let cameraPermissionModal = M.Modal.init(document.querySelector("#camera-permiss
 });
 let cameraStream = null;
 let cameraEl = document.querySelector("#camera");
+let canvasEl = document.querySelector("#canvas");
+let captureBtnEl = document.querySelector("#capture-btn");
 if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
     navigator.mediaDevices.getUserMedia({ video: true })
         .then(stream => {
             postCameraPermission();
+            captureBtnEl.removeAttribute("disabled");
             cameraEl.srcObject = stream;
             cameraEl.play();
             cameraStream = stream;
@@ -54,10 +67,43 @@ setTimeout(() => {
         return;
     cameraPermissionModal.open();
 }, 1000);
-document.querySelector("#capture-btn").onclick = () => {
+captureBtnEl.onclick = () => {
+    captureBtnEl.classList.add("hide");
+    document.querySelector("#predict-loading-wrapper").classList.remove("hide");
+    let canvasContext = canvas.getContext('2d');
     cameraEl.pause();
+    canvasEl.width = cameraEl.videoWidth;
+    canvasEl.height = cameraEl.videoHeight;
+    canvasContext.drawImage(cameraEl, 0, 0, canvasEl.width, canvasEl.height);
     cameraStream.getTracks().forEach(track => track.stop());
+    data = JSON.stringify({
+        imgBase64: canvasEl.toDataURL("image/jpeg")
+    });
+    fetch("{% url 'predict' %}", {
+        method: "POST",
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: data
+    });
     return false;
+}
+
+// https://docs.djangoproject.com/en/3.2/ref/csrf/
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
 }
 </script>
 {% endblock %}
