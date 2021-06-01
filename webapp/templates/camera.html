@@ -91,7 +91,7 @@ captureBtnEl.onclick = () => {
     fetch("{% url 'predict' %}", {
         method: "POST",
         headers: {
-            'X-CSRFToken': getCookie('csrftoken')
+            'X-CSRFToken': Cookies.get('csrftoken')
         },
         body: data
     }).then(res => res.json())
@@ -107,23 +107,6 @@ captureBtnEl.onclick = () => {
         predictResultsBox.classList.remove("hide");
     });
     return false;
-}
-
-// https://docs.djangoproject.com/en/3.2/ref/csrf/
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
 }
 </script>
 {% endblock %}
