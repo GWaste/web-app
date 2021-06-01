@@ -1,4 +1,4 @@
-# HiWaste Web App
+# GWaste Web App
 
 ## Introduction
 
