@@ -26,3 +26,10 @@ nav {
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
 }
+#predict-results-box {
+    max-width: 400px;
+    height: fit-content;
+}
+#predict-results-box ul {
+    margin: 0;
+}

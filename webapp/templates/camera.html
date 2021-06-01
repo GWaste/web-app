@@ -29,6 +29,13 @@
         <p>Alternatively, if you already taken photo and want to upload a file instead, press the button below</p>
     </div>
 </div>
+<div id="predict-results-box" class="card center-in-screen hide">
+    <ul class="collection with-header">
+        <li class="collection-header"><h5>Prediction results</h5></li>
+        <a href="#" class="collection-item" target="_blank"></a>
+        <a href="#" class="collection-item" target="_blank"></a>
+    </ul>
+</div>
 <script>
 let cameraPermissionDone = false;
 let cameraPermissionModal = M.Modal.init(document.querySelector("#camera-permission-modal"), {
@@ -39,6 +46,8 @@ let cameraStream = null;
 let cameraEl = document.querySelector("#camera");
 let canvasEl = document.querySelector("#canvas");
 let captureBtnEl = document.querySelector("#capture-btn");
+let predictLoadingWrapper = document.querySelector("#predict-loading-wrapper");
+let predictResultsBox = document.querySelector("#predict-results-box");
 if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
     navigator.mediaDevices.getUserMedia({ video: true })
         .then(stream => {
@@ -68,8 +77,8 @@ setTimeout(() => {
     cameraPermissionModal.open();
 }, 1000);
 captureBtnEl.onclick = () => {
-    captureBtnEl.classList.add("hide");
-    document.querySelector("#predict-loading-wrapper").classList.remove("hide");
+    captureBtnEl.setAttribute("disabled", true);
+    predictLoadingWrapper.classList.remove("hide");
     let canvasContext = canvas.getContext('2d');
     cameraEl.pause();
     canvasEl.width = cameraEl.videoWidth;
@@ -85,6 +94,17 @@ captureBtnEl.onclick = () => {
             'X-CSRFToken': getCookie('csrftoken')
         },
         body: data
+    }).then(res => res.json())
+    .then((results) => {
+        predictLoadingWrapper.classList.add("hide");
+        let resultItems = predictResultsBox.querySelectorAll(".collection-item");
+        results.forEach((item, index) => {
+            let resultHtml = item.name[0].toUpperCase() + item.name.slice(1);
+            resultHtml += '<span class="right">' + (item.confident * 100).toFixed(2) + '%</span>';
+            resultItems[index].innerHTML = resultHtml;
+            resultItems[index].href = "{% url 'category_noparam' %}/" + item.name;
+        });
+        predictResultsBox.classList.remove("hide");
     });
     return false;
 }
