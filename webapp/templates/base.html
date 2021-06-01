@@ -14,7 +14,9 @@
                 <li><a href="{% url 'favorites' %}">Favorites</a></li>
             </ul>
         </nav>
-        {% block body %}
-        {% endblock %}
+        <div class="main">
+            {% block body %}
+            {% endblock %}
+        </div>
     </body>
 </html>

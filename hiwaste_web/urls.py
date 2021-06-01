@@ -10,4 +10,5 @@ urlpatterns = [
     path('favorites', webapp.views.favorites, name='favorites'),
     path('category', webapp.views.category, name='category_noparam'),
     path('category/<str:category_name>', webapp.views.category, name='category'),
+    path('product/<int:product_id>', webapp.views.product, name='product')
 ]

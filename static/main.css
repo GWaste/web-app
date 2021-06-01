@@ -1,6 +1,10 @@
+.main {
+    margin-bottom: 64px;
+}
 nav {
-    position: absolute;
+    position: fixed;
     bottom: 0;
+    z-index: 1;
 }
 .center-in-screen {
     margin: auto;
@@ -32,4 +36,9 @@ nav {
 }
 #predict-results-box ul {
     margin: 0;
+}
+.card.product img {
+    filter: brightness(60%);
+    height: 200px;
+    object-fit: cover;
 }

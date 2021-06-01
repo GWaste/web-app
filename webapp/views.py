@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http.response import HttpResponse, JsonResponse
+from django.http.response import Http404, HttpResponse, JsonResponse
 from pathlib import Path
 from io import BytesIO
 from base64 import b64decode
@@ -8,16 +8,24 @@ import requests
 
 CONFIG_DIR = Path(__file__).parent.parent.joinpath('config')
 UKM, PRODUCTS, CATEGORIES = {}, {}, {}
-with open(CONFIG_DIR.as_posix() + '/ukm.json', 'r') as f:
-    for ukm in json.load(f)['ukm']:
-        UKM[ukm['id']] = ukm
-with open(CONFIG_DIR.as_posix() + '/product.json', 'r') as f:
-    for product in json.load(f)['products']:
-        PRODUCTS[product['id']] = product
 with open(CONFIG_DIR.as_posix() + '/category.json', 'r') as f:
     for category in json.load(f)['category']:
+        category['products'] = []
         CATEGORIES[category['id']] = category
         CATEGORIES[category['name'].lower()] = category
+with open(CONFIG_DIR.as_posix() + '/product.json', 'r') as f:
+    for product in json.load(f)['products']:
+        product['ukm'] = []
+        PRODUCTS[product['id']] = product
+        CATEGORIES[product['category_id']]['products'].append(product)
+with open(CONFIG_DIR.as_posix() + '/ukm.json', 'r') as f:
+    for ukm in json.load(f)['ukm']:
+        ukm['products'] = []
+        for product_id in ukm['product_id']:
+            product = PRODUCTS[product_id]
+            product['ukm'].append(ukm)
+            ukm['products'].append(product)
+        UKM[ukm['id']] = ukm
 
 def home(request):
     return render(request, 'home.html')
@@ -44,4 +52,13 @@ def favorites(request):
     return HttpResponse('')
 
 def category(request, category_name=''):
-    return HttpResponse('')
+    category_name = category_name.lower()
+    if category_name not in CATEGORIES:
+        raise Http404("Category does not exist")
+    return render(request, 'category.html', {
+        "category_name": category_name.capitalize(),
+        "products": CATEGORIES[category_name]['products']
+    })
+
+def product(request, product_id):
+    return HttpResponse('not implemented yet')
