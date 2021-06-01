@@ -20,6 +20,8 @@ with open(CONFIG_DIR.as_posix() + '/product.json', 'r') as f:
         CATEGORIES[product['category_id']]['products'].append(product)
 with open(CONFIG_DIR.as_posix() + '/ukm.json', 'r') as f:
     for ukm in json.load(f)['ukm']:
+        if ukm['contact']['instagram'] != None:
+            ukm['contact']['instagram'] = ukm['contact']['instagram'][1:]
         ukm['products'] = []
         for product_id in ukm['product_id']:
             product = PRODUCTS[product_id]
@@ -49,7 +51,7 @@ def predict(request):
     return JsonResponse(predictions[0:2], safe=False)
 
 def favorites(request):
-    return HttpResponse('')
+    return HttpResponse('not implemented yet')
 
 def category(request, category_name=''):
     category_name = category_name.lower()
@@ -61,4 +63,10 @@ def category(request, category_name=''):
     })
 
 def product(request, product_id):
-    return HttpResponse('not implemented yet')
+    if product_id not in PRODUCTS:
+        raise Http404("Product does not exist")
+    product = PRODUCTS[product_id]
+    product['embed_yt'] = "https://youtube.com/embed/" + product['link_yt'].split("?v=")[1]
+    return render(request, 'product.html', {
+        "product": PRODUCTS[product_id]
+    })

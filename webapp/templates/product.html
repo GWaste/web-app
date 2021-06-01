@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="row">
+    <h4 class="col s12">{{ product.name }}</h4>
+    <div class="col s12">
+        <img src="{{ product.image }}" alt="{{ product.name }}">
+    </div>
+    <h5 class="col s12">Ingredients</h5>
+    <ul class="browser-default">
+        {% for ingredient in product.ingredient %}
+            <li>{{ ingredient }}</li>
+        {% endfor %}
+    </ul>
+    <h5 class="col s12">Steps</h5>
+    <div class="col s12">
+        <div class="video-container">
+            <iframe src="{{ product.embed_yt }}" frameborder="0" allowfullscreen></iframe>
+        </div>
+    </div>
+    <ol>
+        {% for step in product.step %}
+            <li>{{ step }}</li>
+        {% endfor %}
+    </ol>
+    <h5 class="col s12">Related Businesses</h5>
+    <div class="col s12">
+        <ul class="collection">
+            {% for ukm in product.ukm %}
+                <li class="collection-item">
+                    <h6>{{ ukm.name }}</h6>
+                    <div class="right">
+                        {% if ukm.contact.whatsapp %}
+                            <a href="https://wa.me/{{ ukm.contact.whatsapp }}">WhatsApp</a>
+                        {% endif %}
+                        {% if ukm.contact.instagram %}
+                            <a href="https://instagram.com/{{ ukm.contact.instagram }}">Instagram</a>
+                        {% endif %}
+                        {% if ukm.contact.facebook %}
+                            <a href="https://facebook.com/{{ ukm.contact.facebook }}">Facebook</a>
+                        {% endif %}
+                    </div>
+                    <br />
+                    {{ ukm.map.location }}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+<div class="fixed-action-btn">
+    <a id="favorite-btn" class="btn-floating btn-large red">
+        <i class="large material-icons">favorite_border</i>
+    </a>
+</div>
+<script>
+let favoriteBtn = document.querySelector("#favorite-btn");
+if (Cookies.get("favorites") == null)
+    Cookies.set("favorites", "");
+let favorites = Cookies.get("favorites").split(",");
+if (favorites.indexOf("{{ product.id }}") > -1)
+    favoriteBtn.firstElementChild.innerText = "favorite";
+favoriteBtn.onclick = () => {
+    let favIndex = favorites.indexOf("{{ product.id }}");
+    if (favIndex > -1) {
+        favorites.splice(favIndex, 1);
+        favoriteBtn.firstElementChild.innerText = "favorite_border";
+    } else {
+        favorites.push("{{ product.id }}");
+        favoriteBtn.firstElementChild.innerText = "favorite";
+    }
+    Cookies.set("favorites", favorites);
+}
+</script>
+{% endblock %}
