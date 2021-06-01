@@ -6,6 +6,7 @@ from base64 import b64decode
 import json
 import requests
 from urllib.parse import unquote
+from django.middleware.csrf import get_token
 
 CONFIG_DIR = Path(__file__).parent.parent.joinpath('config')
 UKM, PRODUCTS, CATEGORIES = {}, {}, {}
@@ -37,6 +38,7 @@ def home(request):
     })
 
 def camera(request):
+    csrf_token = get_token(request)
     return render(request, 'camera.html')
 
 def predict(request):
