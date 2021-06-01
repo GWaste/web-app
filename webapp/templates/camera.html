@@ -49,14 +49,28 @@ let captureBtnEl = document.querySelector("#capture-btn");
 let predictLoadingWrapper = document.querySelector("#predict-loading-wrapper");
 let predictResultsBox = document.querySelector("#predict-results-box");
 if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-            postCameraPermission();
-            captureBtnEl.removeAttribute("disabled");
-            cameraEl.srcObject = stream;
-            cameraEl.play();
-            cameraStream = stream;
-        }).catch(showNoCamera);
+    navigator.mediaDevices.getUserMedia({
+        video: {
+            facingMode: {
+                exact: 'environment'
+            }
+        }
+    }).catch((error) => {
+        if (error instanceof OverconstrainedError) {
+            // fallback
+            console.log("oops, OverconstrainedError");
+            console.debug(error);
+            return navigator.mediaDevices.getUserMedia({video: true});
+        }
+        throw error;
+    })
+    .then(stream => {
+        postCameraPermission();
+        captureBtnEl.removeAttribute("disabled");
+        cameraEl.srcObject = stream;
+        cameraEl.play();
+        cameraStream = stream;
+    }).catch(showNoCamera);
 } else {
     showNoCamera("not supported");
 }
