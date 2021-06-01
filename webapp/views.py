@@ -5,6 +5,7 @@ from io import BytesIO
 from base64 import b64decode
 import json
 import requests
+from urllib.parse import unquote
 
 CONFIG_DIR = Path(__file__).parent.parent.joinpath('config')
 UKM, PRODUCTS, CATEGORIES = {}, {}, {}
@@ -30,7 +31,10 @@ with open(CONFIG_DIR.as_posix() + '/ukm.json', 'r') as f:
         UKM[ukm['id']] = ukm
 
 def home(request):
-    return render(request, 'home.html')
+    products = [PRODUCTS[x] for x in PRODUCTS]
+    return render(request, 'home.html', {
+        "products": products
+    })
 
 def camera(request):
     return render(request, 'camera.html')
@@ -51,7 +55,20 @@ def predict(request):
     return JsonResponse(predictions[0:2], safe=False)
 
 def favorites(request):
-    return HttpResponse('not implemented yet')
+    favs = request.COOKIES.get("favorites")
+    if (favs is None):
+        favs = []
+    else:
+        favs = unquote(favs)
+        if favs[0] == ",":
+            favs = favs[1:]
+        favs = favs.split(",")
+    products = []
+    for fav in favs:
+        products.append(PRODUCTS[int(fav)])
+    return render(request, 'favorites.html', {
+        "products": products
+    })
 
 def category(request, category_name=''):
     category_name = category_name.lower()
