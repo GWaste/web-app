@@ -19,6 +19,12 @@
         <p>GWaste app needs camera permission to be able to classify your waste.</p>
         <hr>
         <p>Alternatively, if you already taken photo and want to upload a file instead, press the button below</p>
+        <div class="file-field input-field">
+            <div class="btn"><span>Choose file</span><input type="file" name="inputImage" class="input-image"></div>
+            <div class="file-path-wrapper">
+                <input type="text" class="file-path validate">
+            </div>
+        </div>
     </div>
 </div>
 <div class="modal" id="no-camera-modal">
@@ -27,6 +33,12 @@
         <p>Currently you blocked access to camera, or your browser is not supported.</p>
         <hr>
         <p>Alternatively, if you already taken photo and want to upload a file instead, press the button below</p>
+        <div class="file-field input-field">
+            <div class="btn"><span>Choose file</span><input type="file" name="inputImage" class="input-image"></div>
+            <div class="file-path-wrapper">
+                <input type="text" class="file-path validate">
+            </div>
+        </div>
     </div>
 </div>
 <div id="predict-results-box" class="card center-in-screen hide">
@@ -41,6 +53,9 @@ let cameraPermissionDone = false;
 let cameraPermissionModal = M.Modal.init(document.querySelector("#camera-permission-modal"), {
     'dismissible': false,
     'endingTop': '20%'
+});
+let noCameraModal = M.Modal.init(document.querySelector("#no-camera-modal"), {
+    'dismissible': false
 });
 let cameraStream = null;
 let cameraEl = document.querySelector("#camera");
@@ -80,9 +95,7 @@ function postCameraPermission() {
 }
 function showNoCamera(reason) {
     postCameraPermission();
-    M.Modal.init(document.querySelector("#no-camera-modal"), {
-        'dismissible': false
-    }).open();
+    noCameraModal.open();
     console.error(reason);
 }
 setTimeout(() => {
@@ -90,17 +103,9 @@ setTimeout(() => {
         return;
     cameraPermissionModal.open();
 }, 1000);
-captureBtnEl.onclick = () => {
-    captureBtnEl.setAttribute("disabled", true);
-    predictLoadingWrapper.classList.remove("hide");
-    let canvasContext = canvas.getContext('2d');
-    cameraEl.pause();
-    canvasEl.width = cameraEl.videoWidth;
-    canvasEl.height = cameraEl.videoHeight;
-    canvasContext.drawImage(cameraEl, 0, 0, canvasEl.width, canvasEl.height);
-    cameraStream.getTracks().forEach(track => track.stop());
+function doPredict(imgBase64) {
     data = JSON.stringify({
-        imgBase64: canvasEl.toDataURL("image/jpeg")
+        imgBase64: imgBase64
     });
     fetch("{% url 'predict' %}", {
         method: "POST",
@@ -120,7 +125,31 @@ captureBtnEl.onclick = () => {
         });
         predictResultsBox.classList.remove("hide");
     });
+}
+captureBtnEl.onclick = () => {
+    captureBtnEl.setAttribute("disabled", true);
+    predictLoadingWrapper.classList.remove("hide");
+    let canvasContext = canvas.getContext('2d');
+    cameraEl.pause();
+    canvasEl.width = cameraEl.videoWidth;
+    canvasEl.height = cameraEl.videoHeight;
+    canvasContext.drawImage(cameraEl, 0, 0, canvasEl.width, canvasEl.height);
+    cameraStream.getTracks().forEach(track => track.stop());
+    doPredict(canvasEl.toDataURL("image/jpeg"));
     return false;
 }
+function handleFileInput(event) {
+    predictLoadingWrapper.classList.remove("hide");
+    noCameraModal.close();
+    cameraPermissionModal.close();
+    let reader = new FileReader();
+    reader.readAsDataURL(event.target.files[0]);
+    reader.onload = () => {
+        doPredict(reader.result);
+    };
+}
+document.querySelectorAll(".input-image").forEach((item, index) => {
+    item.onchange = handleFileInput;
+});
 </script>
 {% endblock %}
