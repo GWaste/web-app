@@ -58,7 +58,7 @@ def predict(request):
 
 def favorites(request):
     favs = request.COOKIES.get("favorites")
-    if (favs is None):
+    if (favs is None or len(favs) == 0):
         favs = []
     else:
         favs = unquote(favs)
