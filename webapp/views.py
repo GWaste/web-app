@@ -85,7 +85,7 @@ def product(request, product_id):
     if product_id not in PRODUCTS:
         raise Http404("Product does not exist")
     product = PRODUCTS[product_id]
-    product['embed_yt'] = "https://youtube.com/embed/" + product['link_yt'].split("?v=")[1]
+    product['embed_yt'] = "https://youtube.com/embed/" + product['link_yt']
     return render(request, 'product.html', {
         "product": PRODUCTS[product_id]
     })
