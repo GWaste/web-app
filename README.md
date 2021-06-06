@@ -1,8 +1,9 @@
-# GWaste Web App
+<h1 align="center">GWaste: Get to know your Waste</h1>
+<h3 align="center">Waste Web App</h3>
 
 ## Introduction
 
-This web app written using Django framework, where... hmm... I'm just started learning it last week 😅. I think there's some broken English here, if you can fix it, just create a PR and we will review it together.
+This web app written using Django framework.
 
 ## venv (Virtual Environment) Initialization
 
