@@ -43,3 +43,10 @@ python manage.py runserver
 I highly recommend using VSCode for this project. I have commited some config files like `.vscode/launch.json`, where you can just launch and debug the app by just pressing `F5`.
 
 Of course, you need to install some extensions to make jobs easier. You can take a look a file named `.vscode/extensions.json`.
+
+
+## Acknowledgements
+
+ - [Bangkit](http://bangkit.academy/)
+ - [GWaste](https://github.com/GWaste/Introduction)
+
